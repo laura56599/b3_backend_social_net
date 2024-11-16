@@ -1,38 +1,37 @@
 import { Router } from "express";
-import { testPublication, savePublication, showPublication, deletePublication, publicationsUser, uploadMedia, showMedia, feed } from "../controllers/publication.js";
-import { ensureAuth } from '../middlewares/auth.js';
-import multer from "multer";
+import { testUser, register, login, profile, listUsers, updateUser, uploadAvatar, avatar } from "../controllers/user.js";
+import { ensureAuth } from "../middlewares/auth.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import pkg from 'cloudinary';
-const { v2: cloudinary } = pkg;
+import multer from "multer";
 
-// Configuración de subida de archivos en Cloudinary
+const {v2: cloudinary} = pkg;
+
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'publications',
-    allowedFormats: ['jpg', 'png', 'jpeg', 'gif'],  // formatos permitidos
-    public_id: (req, file) => 'publication-' + Date.now()
-  }
+    cloudinary: cloudinary,
+    params: {
+        folder: 'avatars',
+        allowedFormats: ['jpg', 'png', 'jpeg', 'gif'],
+        public_id:(req, file) => 'avatar-' + Date.now()
+    }
+
 });
 
-// Configurar multer con límites de tamaño de archivos
-const uploads = multer({
-  storage: storage,
-  limits: { fileSize: 1 * 1024 * 1024 } // Limitar tamaño a 1 MB
-});
+const uploads = multer ({
+    storage: storage,
+    limits: {fileSize: 1 * 1024 * 1024 }
+})
 
 const router = Router();
 
-// Definir rutas de publication
-router.get('/test-publication', ensureAuth, testPublication );
-router.post('/new-publication', ensureAuth, savePublication);
-router.get('/show-publication/:id', ensureAuth, showPublication);
-router.delete('/delete-publication/:id', ensureAuth, deletePublication);
-router.get('/publications-user/:id/:page?', ensureAuth, publicationsUser);
-router.post('/upload-media/:id', [ensureAuth, uploads.single("file0")], uploadMedia);
-router.get('/media/:id', showMedia);
-router.get('/feed/:page?', ensureAuth, feed);
-
+// Definir rutas de user
+router.get('/test-user', ensureAuth, testUser);
+router.post('/register', register);
+router.post('/login', login);
+router.get('/profile/:id', ensureAuth, profile);
+router.get('/list/:page?', ensureAuth, listUsers);
+router.put('/update', ensureAuth, updateUser);
+router.post('/upload-avatar', ensureAuth, uploads.single("file0"), uploadAvatar);
+router.get('/avatar/:id?', avatar)
 //Exportar el Router
 export default router;
