@@ -1,24 +1,15 @@
-import { Schema, model } from "mongoose";
-import mongoosePaginate from "mongoose-paginate-v2";
+import { Router } from "express";
+import { testFollow, saveFollow, unfollow, following, followers } from "../controllers/follow.js";
+import { ensureAuth } from "../middlewares/auth.js";
 
-const PublicationSchema = Schema({
-  user_id: {
-    type: Schema.ObjectId,
-    ref: "User",
-    required: true
-  },
-  text: {
-    type: String,
-    required: true
-  },
-  file: String,
-  created_at: {
-    type: Date,
-    default: Date.now
-  }
-});
+const router = Router();
 
-// Configurar plugin de paginación
-PublicationSchema.plugin(mongoosePaginate);
+// Definir las rutas
+router.get('/test-follow', testFollow);
+router.post("/follow", ensureAuth, saveFollow);
+router.delete("/unfollow/:id", ensureAuth, unfollow);
+router.get("/following/:id?/:page?", ensureAuth, following);
+router.get("/followers/:id?/:page?", ensureAuth, followers);
 
-export default model("Publication", PublicationSchema, "publications");
+//Exportar el Router
+export default router;
